@@ -2,6 +2,10 @@ server:
   port: 8123
   servlet:
     context-path: /api
+    # cookie 过期时间
+    session:
+      cookie:
+        max-age: 2592000
 spring:
   application:
     name: foj-backend
@@ -33,7 +37,6 @@ knife4j:
     version: v1.0
     group:
       default:
-        group-name: 默认分组
         api-rule: package
         api-rule-resources:
           - com.defen.fojbackend.controller
