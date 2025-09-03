@@ -8,13 +8,13 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 用户
+ * 题目提交
  *
- * @TableName user
+ * @TableName question_submit
  */
-@TableName(value = "user")
+@TableName(value = "question_submit")
 @Data
-public class User implements Serializable {
+public class QuestionSubmit implements Serializable {
     /**
      * id
      */
@@ -22,40 +22,40 @@ public class User implements Serializable {
     private Long id;
 
     /**
-     * 账号
+     * 编程语言
      */
-    @TableField(value = "user_account")
-    private String userAccount;
+    @TableField(value = "language")
+    private String language;
 
     /**
-     * 密码
+     * 用户代码
      */
-    @TableField(value = "user_password")
-    private String userPassword;
+    @TableField(value = "code")
+    private String code;
 
     /**
-     * 用户昵称
+     * 判题信息（json 对象）
      */
-    @TableField(value = "username")
-    private String username;
+    @TableField(value = "judge_info")
+    private String judgeInfo;
 
     /**
-     * 用户头像
+     * 判题状态（0 - 待判题、1 - 判题中、2 - 成功、3 - 失败）
      */
-    @TableField(value = "user_avatar")
-    private String userAvatar;
+    @TableField(value = "status")
+    private Integer status;
 
     /**
-     * 用户简介
+     * 题目 id
      */
-    @TableField(value = "user_profile")
-    private String userProfile;
+    @TableField(value = "question_id")
+    private Long questionId;
 
     /**
-     * 用户角色：user/admin
+     * 创建用户 id
      */
-    @TableField(value = "user_role")
-    private String userRole;
+    @TableField(value = "user_id")
+    private Long userId;
 
     /**
      * 编辑时间
