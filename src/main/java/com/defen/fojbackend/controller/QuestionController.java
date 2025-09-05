@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -249,6 +251,8 @@ public class QuestionController {
         if (judgeConfig != null) {
             question.setJudgeConfig(JSONUtil.toJsonStr(judgeConfig));
         }
+        // 设置编辑时间
+        question.setEditTime(new Date());
         // 参数校验
         questionService.validQuestion(question, false);
         User loginUser = userService.getCurrentUser(request);
@@ -262,6 +266,21 @@ public class QuestionController {
         }
         boolean result = questionService.updateById(question);
         return ApiResponse.success(result);
+    }
+
+    /**
+     * 获取预置标签和分类
+     *
+     * @return
+     */
+    @GetMapping("/tag_category")
+    public ApiResponse<QuestionTagCategory> listQuestionTagCategory() {
+        QuestionTagCategory questionTagCategory = new QuestionTagCategory();
+        List<String> tagList = Arrays.asList("数组", "字符串", "链表", "栈与队列", "二叉树", "动态规范", "回溯算法", "贪心算法");
+        List<String> categoryList = Arrays.asList("简单", "中等", "困难");
+        questionTagCategory.setTagList(tagList);
+        questionTagCategory.setCategoryList(categoryList);
+        return ApiResponse.success(questionTagCategory);
     }
 
 }
