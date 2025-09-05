@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.defen.fojbackend.exception.BusinessException;
 import com.defen.fojbackend.exception.ErrorCode;
 import com.defen.fojbackend.exception.ExceptionUtils;
+import com.defen.fojbackend.judge.JudgeService;
 import com.defen.fojbackend.mapper.QuestionSubmitMapper;
 import com.defen.fojbackend.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.defen.fojbackend.model.dto.questionsubmit.QuestionSubmitQueryRequest;
@@ -21,10 +22,12 @@ import com.defen.fojbackend.model.vo.QuestionSubmitVo;
 import com.defen.fojbackend.service.QuestionService;
 import com.defen.fojbackend.service.QuestionSubmitService;
 import com.defen.fojbackend.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +44,10 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 
     @Resource
     private UserService userService;
+
+    @Resource
+    @Lazy
+    private JudgeService judgeService;
 
     /**
      * 提交题目
@@ -76,7 +83,12 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         questionSubmit.setUserId(userId);
         boolean result = this.save(questionSubmit);
         ExceptionUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "操作失败");
-        return questionSubmit.getId();
+        Long questionSubmitId = questionSubmit.getId();
+        //执行判题服务
+        CompletableFuture.runAsync(() -> {
+            judgeService.doJudge(questionSubmitId);
+        });
+        return questionSubmitId;
     }
 
     /**
