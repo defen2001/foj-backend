@@ -17,7 +17,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   # redis 配置
   redis:
-    database: 1
+    database: 0
     host: 127.0.0.1
     port: 6379
     connect-timeout: 5000
@@ -55,3 +55,6 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.defen.fojbackend.controller
+# 代码沙箱配置 (example, remote, thirdParty)
+codesandbox:
+  type: example
