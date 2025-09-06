@@ -1,6 +1,6 @@
 package com.defen.fojbackend.judge.strategy;
 
-import com.defen.fojbackend.model.dto.questionsubmit.JudgeInfo;
+import com.defen.fojbackend.judge.codesandbox.model.JudgeInfo;
 
 /**
  * 判题策略

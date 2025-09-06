@@ -10,7 +10,7 @@ import com.defen.fojbackend.judge.codesandbox.model.ExecuteCodeRequest;
 import com.defen.fojbackend.judge.codesandbox.model.ExecuteCodeResponse;
 import com.defen.fojbackend.judge.strategy.JudgeContext;
 import com.defen.fojbackend.model.dto.question.JudgeCase;
-import com.defen.fojbackend.model.dto.questionsubmit.JudgeInfo;
+import com.defen.fojbackend.judge.codesandbox.model.JudgeInfo;
 import com.defen.fojbackend.model.entity.Question;
 import com.defen.fojbackend.model.entity.QuestionSubmit;
 import com.defen.fojbackend.model.enums.QuestionSubmitStatusEnum;

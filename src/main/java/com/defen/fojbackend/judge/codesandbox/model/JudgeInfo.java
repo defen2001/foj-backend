@@ -1,4 +1,4 @@
-package com.defen.fojbackend.model.dto.questionsubmit;
+package com.defen.fojbackend.judge.codesandbox.model;
 
 import lombok.Data;
 

@@ -1,7 +1,7 @@
 package com.defen.fojbackend.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.defen.fojbackend.model.dto.questionsubmit.JudgeInfo;
+import com.defen.fojbackend.judge.codesandbox.model.JudgeInfo;
 import com.defen.fojbackend.model.entity.QuestionSubmit;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

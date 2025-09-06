@@ -4,7 +4,7 @@ import com.defen.fojbackend.judge.strategy.DefaultJudgeStrategy;
 import com.defen.fojbackend.judge.strategy.JavaLanguageJudgeStrategy;
 import com.defen.fojbackend.judge.strategy.JudgeContext;
 import com.defen.fojbackend.judge.strategy.JudgeStrategy;
-import com.defen.fojbackend.model.dto.questionsubmit.JudgeInfo;
+import com.defen.fojbackend.judge.codesandbox.model.JudgeInfo;
 import com.defen.fojbackend.model.entity.QuestionSubmit;
 import org.springframework.stereotype.Service;
 
