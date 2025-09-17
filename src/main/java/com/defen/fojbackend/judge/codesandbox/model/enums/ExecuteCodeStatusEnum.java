@@ -1,6 +1,6 @@
-package com.defen.fojbackend.model.enums;
+package com.defen.fojbackend.judge.codesandbox.model.enums;
 
-import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -8,27 +8,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 判题消息枚举
+ * 执行代码状态枚举
  */
 @Getter
-public enum JudgeInfoMessageEnum {
+public enum ExecuteCodeStatusEnum {
 
-    ACCEPT("成功", 0),
-    COMPILE_ERROR("编译错误", 1),
-    RUN_ERROR("运行错误", 2),
-    TIME_LIMIT_EXCEEDED("超时", 3),
-    WRONG_ANSWER("答案错误", 4);
+    SUCCESS("执行成功", 0),
+    COMPILE_ERROR("编译失败", 1),
+    RUNTIME_ERROR("执行失败", 2),
+    TIME_LIMIT_EXCEEDED("超出时间限制", 3);
+
     private final String text;
 
     private final Integer value;
 
-    JudgeInfoMessageEnum(String text, Integer value) {
+    ExecuteCodeStatusEnum(String text, Integer value) {
         this.text = text;
         this.value = value;
     }
 
     /**
      * 获取值列表
+     *
+     * @return
      */
     public static List<Integer> getValues() {
         return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
@@ -40,11 +42,11 @@ public enum JudgeInfoMessageEnum {
      * @param value 枚举值的value
      * @return 枚举值
      */
-    public static JudgeInfoMessageEnum getEnumByValue(Integer value) {
-        if (ObjectUtils.isEmpty(value)) {
+    public static ExecuteCodeStatusEnum getEnumByValue(Integer value) {
+        if (ObjUtil.isEmpty(value)) {
             return null;
         }
-        for (JudgeInfoMessageEnum anEnum : JudgeInfoMessageEnum.values()) {
+        for (ExecuteCodeStatusEnum anEnum : ExecuteCodeStatusEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }

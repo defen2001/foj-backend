@@ -16,7 +16,8 @@ public enum ErrorCode {
     FORBIDDEN_ERROR(403000, "禁止访问"),
     OPERATION_ERROR(403001, "操作失败"),
     SYSTEM_ERROR(500000, "系统内部错误"),
-    DB_ERROR(500001, "数据库操作失败");
+    DB_ERROR(500001, "数据库操作失败"),
+    API_REQUEST_ERROR(500010, "调用接口失败");
 
     /**
      * 状态吗
