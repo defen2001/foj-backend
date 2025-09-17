@@ -22,4 +22,24 @@ public class JudgeInfo {
      * 消耗时间
      */
     private Long time;
+
+    /**
+     * 状态码
+     */
+    private Integer status;
+
+    /**
+     * 通过用例数
+     */
+    private Integer pass;
+
+    /**
+     * 总用例数
+     */
+    private Integer total;
+
+    // 未通过的最后一个用例信息
+    private String input;
+    private String output;
+    private String expectedOutput;
 }

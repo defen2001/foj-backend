@@ -16,7 +16,7 @@ public class ExecuteCodeResponse {
     /**
      * 输出用例
      */
-    private List<String> outputList;
+    private List<ExecuteMessage> results;
 
     /**
      * 接口信息
@@ -28,8 +28,4 @@ public class ExecuteCodeResponse {
      */
     private Integer status;
 
-    /**
-     * 判题信息
-     */
-    private JudgeInfo judgeInfo;
 }

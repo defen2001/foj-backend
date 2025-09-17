@@ -1,6 +1,7 @@
 package com.defen.fojbackend.judge;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.defen.fojbackend.exception.BusinessException;
 import com.defen.fojbackend.exception.ErrorCode;
 import com.defen.fojbackend.judge.codesandbox.CodeSandbox;
@@ -8,11 +9,14 @@ import com.defen.fojbackend.judge.codesandbox.CodeSandboxFactory;
 import com.defen.fojbackend.judge.codesandbox.CodeSandboxProxy;
 import com.defen.fojbackend.judge.codesandbox.model.ExecuteCodeRequest;
 import com.defen.fojbackend.judge.codesandbox.model.ExecuteCodeResponse;
-import com.defen.fojbackend.judge.strategy.JudgeContext;
-import com.defen.fojbackend.model.dto.question.JudgeCase;
 import com.defen.fojbackend.judge.codesandbox.model.JudgeInfo;
+import com.defen.fojbackend.judge.codesandbox.model.enums.ExecuteCodeStatusEnum;
+import com.defen.fojbackend.judge.strategy.JudgeStrategyFactory;
+import com.defen.fojbackend.model.dto.question.JudgeCase;
+import com.defen.fojbackend.model.dto.question.JudgeConfig;
 import com.defen.fojbackend.model.entity.Question;
 import com.defen.fojbackend.model.entity.QuestionSubmit;
+import com.defen.fojbackend.model.enums.JudgeInfoMessageEnum;
 import com.defen.fojbackend.model.enums.QuestionSubmitStatusEnum;
 import com.defen.fojbackend.service.QuestionService;
 import com.defen.fojbackend.service.QuestionSubmitService;
@@ -33,7 +37,7 @@ public class JudgeServiceImpl implements JudgeService {
     private QuestionSubmitService questionSubmitService;
 
     @Resource
-    private JudgeManager judgeManager;
+    private JudgeStrategyFactory judgeStrategyFactory;
 
     @Value("${codesandbox.type:example}")
     private String codesandboxType;
@@ -64,38 +68,46 @@ public class JudgeServiceImpl implements JudgeService {
         }
         // 4.调用代码沙箱，获取执行结果
         CodeSandbox codeSandbox = CodeSandboxFactory.newInstance(codesandboxType);
-        codeSandbox=new CodeSandboxProxy(codeSandbox);
+        codeSandbox = new CodeSandboxProxy(codeSandbox);
         String language = questionSubmit.getLanguage();
         String code = questionSubmit.getCode();
         // 获取输入用例
         String judgeCaseStr = question.getJudgeCase();
         List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
         List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        // 期望输出
+        List<String> expectedOutput = judgeCaseList.stream().map(judgeCase -> judgeCase.getOutput().trim())
+                .collect(Collectors.toList());
+        // 判题配置
+        JudgeConfig judgeConfig = JSONUtil.toBean(question.getJudgeConfig(), JudgeConfig.class);
         ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
                 .code(code)
                 .language(language)
                 .inputList(inputList)
                 .build();
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
-        List<String> outputList = executeCodeResponse.getOutputList();
 
         // 5.根据沙箱的执行结果，设置题目的判题状态和信息
-        JudgeContext judgeContext=new JudgeContext();
-        judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
-        judgeContext.setInputList(inputList);
-        judgeContext.setOutputList(outputList);
-        judgeContext.setJudgeCaseList(judgeCaseList);
-        judgeContext.setQuestion(question);
-        judgeContext.setQuestionSubmit(questionSubmit);
-        JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
+        JudgeInfo judgeInfo = judgeStrategyFactory.getStrategy(ExecuteCodeStatusEnum.getEnumByValue(executeCodeResponse.getStatus()))
+                .doJudge(executeCodeResponse, inputList, expectedOutput, judgeConfig);
+
         // 6.修改数据库中的判题结果
+        boolean submitStatus = judgeInfo.getStatus().equals(JudgeInfoMessageEnum.ACCEPT.getValue());
         questionSubmitUpdate = new QuestionSubmit();
         questionSubmitUpdate.setId(questionSubmitId);
-        questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.SUCCESS.getValue());
+        questionSubmitUpdate.setStatus(
+                submitStatus ? QuestionSubmitStatusEnum.SUCCESS.getValue() : QuestionSubmitStatusEnum.FAILED.getValue()
+        );
         questionSubmitUpdate.setJudgeInfo(JSONUtil.toJsonStr(judgeInfo));
         update = questionSubmitService.updateById(questionSubmitUpdate);
         if (!update) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新错误");
+        }
+        // 7.修改题目通过数
+        if (submitStatus) {
+            questionService.update(new UpdateWrapper<Question>()
+                    .setSql("accepted_num = accepted_num + 1")
+                    .eq("id", question.getId()));
         }
         QuestionSubmit questionSubmitResult = questionSubmitService.getById(questionId);
         return questionSubmitResult;

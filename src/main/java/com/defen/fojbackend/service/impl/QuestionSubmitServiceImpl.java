@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.defen.fojbackend.exception.BusinessException;
@@ -63,7 +64,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         Long questionId = questionSubmitAddRequest.getQuestionId();
         QuestionSubmitLanguageEnum languageEnum = QuestionSubmitLanguageEnum.getEnumByValue(language);
         if (languageEnum == null) {
-            throw new BusinessException(ErrorCode.PARAM_ERROR, "编程语言错误");
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "不支持的编程语言");
         }
         if (StrUtil.isEmpty(code)) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "不能提交空代码");
@@ -73,6 +74,10 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         }
+        // 7.修改题目提交数
+        questionService.update(new UpdateWrapper<Question>()
+                .setSql("submit_num = submit_num + 1")
+                .eq("id", question.getId()));
         Long userId = loginUser.getId();
         QuestionSubmit questionSubmit = new QuestionSubmit();
         questionSubmit.setLanguage(language);
@@ -110,7 +115,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         String sortField = questionSubmitQueryRequest.getSortField();
         String sortOrder = questionSubmitQueryRequest.getSortOrder();
         // 拼接查询条件
-        queryWrapper.eq(StrUtil.isNotBlank(language), "language", language);
+        queryWrapper.like(StrUtil.isNotBlank(language), "language", language);
         queryWrapper.eq(ObjectUtil.isNotEmpty(userId), "user_id", userId);
         queryWrapper.eq(ObjectUtil.isNotEmpty(questionId), "question_id", questionId);
         queryWrapper.eq(QuestionSubmitStatusEnum.getEnumByValue(status) != null, "status", status);
