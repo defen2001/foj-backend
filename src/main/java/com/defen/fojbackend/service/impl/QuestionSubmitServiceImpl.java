@@ -27,7 +27,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -145,22 +148,38 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     /**
      * 分页获取题目提交封装
      *
-     * @param questionSubmitPage
-     * @param loginUser
+     * @param questionSubmitQueryRequest
+     * @param request
      * @return
      */
     @Override
-    public Page<QuestionSubmitVo> getQuestionSubmitVoPage(Page<QuestionSubmit> questionSubmitPage, User loginUser) {
+    public Page<QuestionSubmitVo> getQuestionSubmitVoPage(QuestionSubmitQueryRequest questionSubmitQueryRequest, HttpServletRequest request) {
+        long current = questionSubmitQueryRequest.getCurrent();
+        long size = questionSubmitQueryRequest.getPageSize();
+        // 查询数据库
+        Page<QuestionSubmit> questionSubmitPage = this.page(new Page<>(current, size),
+                this.getQueryWrapper(questionSubmitQueryRequest));
         List<QuestionSubmit> questionSubmitList = questionSubmitPage.getRecords();
-        Page<QuestionSubmitVo> questionSubmitVOPage = new Page<>(questionSubmitPage.getCurrent(), questionSubmitPage.getSize(), questionSubmitPage.getTotal());
+        Page<QuestionSubmitVo> questionSubmitVoPage = new Page<>(questionSubmitPage.getCurrent(), questionSubmitPage.getSize(), questionSubmitPage.getTotal());
         if (CollUtil.isEmpty(questionSubmitList)) {
-            return questionSubmitVOPage;
+            return questionSubmitVoPage;
         }
-        List<QuestionSubmitVo> questionSubmitVOList = questionSubmitList.stream().map(questionSubmit ->
-                getQuestionSubmitVo(questionSubmit, loginUser)
-        ).collect(Collectors.toList());
-        questionSubmitVOPage.setRecords(questionSubmitVOList);
-        return questionSubmitVOPage;
+        // 对象列表 => 封装对象列表
+        List<QuestionSubmitVo> questionSubmitVoList = questionSubmitList.stream().map(QuestionSubmitVo::objToVo).collect(Collectors.toList());
+        // 1. 关联查询用户信息
+        Set<Long> userIdSet = questionSubmitList.stream().map(QuestionSubmit::getUserId).collect(Collectors.toSet());
+        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream().collect(Collectors.groupingBy(User::getId));
+        // 2. 填充信息
+        questionSubmitVoList.forEach(questionSubmitVo -> {
+            Long userId = questionSubmitVo.getUserId();
+            User user = null;
+            if (userIdUserListMap.containsKey(userId)) {
+                user = userIdUserListMap.get(userId).get(0);
+            }
+            questionSubmitVo.setUserVo(userService.getUserVo(user));
+        });
+        questionSubmitVoPage.setRecords(questionSubmitVoList);
+        return questionSubmitVoPage;
 
     }
 }

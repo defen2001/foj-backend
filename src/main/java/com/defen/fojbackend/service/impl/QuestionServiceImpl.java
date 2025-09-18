@@ -133,10 +133,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
         // 查询数据库
-        Page<Question> picturePage = this.page(new Page<>(current, size),
+        Page<Question> questionPage = this.page(new Page<>(current, size),
                 this.getQueryWrapper(questionQueryRequest));
-        List<Question> questionList = picturePage.getRecords();
-        Page<QuestionVo> questionVoPage = new Page<>(picturePage.getCurrent(), picturePage.getSize(), picturePage.getTotal());
+        List<Question> questionList = questionPage.getRecords();
+        Page<QuestionVo> questionVoPage = new Page<>(questionPage.getCurrent(), questionPage.getSize(), questionPage.getTotal());
         if (CollUtil.isEmpty(questionList)) {
             return questionVoPage;
         }
@@ -146,13 +146,13 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         Set<Long> userIdSet = questionList.stream().map(Question::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream().collect(Collectors.groupingBy(User::getId));
         // 2. 填充信息
-        questionVoList.forEach(pictureVo -> {
-            Long userId = pictureVo.getUserId();
+        questionVoList.forEach(questionVo -> {
+            Long userId = questionVo.getUserId();
             User user = null;
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            pictureVo.setUserVo(userService.getUserVo(user));
+            questionVo.setUserVo(userService.getUserVo(user));
         });
         questionVoPage.setRecords(questionVoList);
         return questionVoPage;

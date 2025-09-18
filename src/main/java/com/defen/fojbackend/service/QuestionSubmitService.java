@@ -2,12 +2,14 @@ package com.defen.fojbackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.defen.fojbackend.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.defen.fojbackend.model.dto.questionsubmit.QuestionSubmitQueryRequest;
 import com.defen.fojbackend.model.entity.QuestionSubmit;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.defen.fojbackend.model.entity.User;
 import com.defen.fojbackend.model.vo.QuestionSubmitVo;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author chendefeng
@@ -45,10 +47,10 @@ public interface QuestionSubmitService extends IService<QuestionSubmit> {
     /**
      * 分页获取题目提交封装
      *
-     * @param questionSubmitPage
-     * @param loginUser
+     * @param questionSubmitQueryRequest
+     * @param request
      * @return
      */
-    Page<QuestionSubmitVo> getQuestionSubmitVoPage(Page<QuestionSubmit> questionSubmitPage, User loginUser);
+    Page<QuestionSubmitVo> getQuestionSubmitVoPage(QuestionSubmitQueryRequest questionSubmitQueryRequest, HttpServletRequest request);
 
 }

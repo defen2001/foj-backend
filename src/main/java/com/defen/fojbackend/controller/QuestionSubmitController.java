@@ -6,7 +6,6 @@ import com.defen.fojbackend.exception.BusinessException;
 import com.defen.fojbackend.exception.ErrorCode;
 import com.defen.fojbackend.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.defen.fojbackend.model.dto.questionsubmit.QuestionSubmitQueryRequest;
-import com.defen.fojbackend.model.entity.QuestionSubmit;
 import com.defen.fojbackend.model.entity.User;
 import com.defen.fojbackend.model.vo.QuestionSubmitVo;
 import com.defen.fojbackend.service.QuestionSubmitService;
@@ -60,14 +59,10 @@ public class QuestionSubmitController {
      */
     @PostMapping("/list/page/vo")
     public ApiResponse<Page<QuestionSubmitVo>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest, HttpServletRequest request) {
-        long current = questionSubmitQueryRequest.getCurrent();
-        long size = questionSubmitQueryRequest.getPageSize();
         //从数据提取到原始的分页信息
-        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
-                questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
-        User loginUser = userService.getCurrentUser(request);
+        Page<QuestionSubmitVo> questionSubmitVoPage = questionSubmitService.getQuestionSubmitVoPage(questionSubmitQueryRequest, request);
         //返回脱敏信息
-        return ApiResponse.success(questionSubmitService.getQuestionSubmitVoPage(questionSubmitPage, loginUser));
+        return ApiResponse.success(questionSubmitVoPage);
     }
 
 }
