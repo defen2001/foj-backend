@@ -20,6 +20,7 @@ import com.defen.fojbackend.model.entity.User;
 import com.defen.fojbackend.model.enums.QuestionSubmitLanguageEnum;
 import com.defen.fojbackend.model.enums.QuestionSubmitStatusEnum;
 import com.defen.fojbackend.model.vo.QuestionSubmitVo;
+import com.defen.fojbackend.rabbitmq.MessageProducer;
 import com.defen.fojbackend.service.QuestionService;
 import com.defen.fojbackend.service.QuestionSubmitService;
 import com.defen.fojbackend.service.UserService;
@@ -52,6 +53,9 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     @Lazy
     private JudgeService judgeService;
+
+    @Resource
+    private MessageProducer messageProducer;
 
     /**
      * 提交题目
@@ -93,9 +97,10 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         ExceptionUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "操作失败");
         Long questionSubmitId = questionSubmit.getId();
         //执行判题服务
-        CompletableFuture.runAsync(() -> {
-            judgeService.doJudge(questionSubmitId);
-        });
+        messageProducer.sendMessage("code_exchange", "java", String.valueOf(questionSubmitId));
+//        CompletableFuture.runAsync(() -> {
+//            judgeService.doJudge(questionSubmitId);
+//        });
         return questionSubmitId;
     }
 
